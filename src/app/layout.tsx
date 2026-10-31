@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Cinzel, Geist } from "next/font/google";
+import { Cinzel, Geist, Playfair_Display } from "next/font/google";
+import Navbar from "@/components/layout/navbar/Navbar";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,6 +13,12 @@ const cinzel = Cinzel({
   subsets: ["latin"],
 });
 
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+});
+
 export const metadata: Metadata = {
   title: "Avvira Agro Industries",
   description: "Avvira Agro Industries. Growing Value Naturally.",
@@ -21,9 +28,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${cinzel.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${cinzel.variable} ${playfair.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Navbar />
+        {children}
+      </body>
     </html>
   );
 }

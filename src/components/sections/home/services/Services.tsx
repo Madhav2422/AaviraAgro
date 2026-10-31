@@ -18,7 +18,8 @@ export default function Services() {
           >
             {heading.start}
             <br />
-            <em className="text-brand-gold">{heading.accent}</em> {heading.end}
+            <em className="text-brand-gold">{heading.accent}</em>
+            {` ${heading.end}`}
           </h2>
         </div>
         <p

@@ -5,6 +5,7 @@
   --foreground: #171717;
   --brand-gold: #a67c1e;
   --brand-gold-deep: #86630f;
+  --brand-wheat: #e4c06a;
   --brand-green: #1f5a2c;
   --brand-ink: #14261b;
   --brand-muted: #4c564d;
@@ -15,6 +16,7 @@
   --color-foreground: var(--foreground);
   --color-brand-gold: var(--brand-gold);
   --color-brand-gold-deep: var(--brand-gold-deep);
+  --color-brand-wheat: var(--brand-wheat);
   --color-brand-green: var(--brand-green);
   --color-brand-ink: var(--brand-ink);
   --color-brand-muted: var(--brand-muted);
@@ -75,6 +77,121 @@
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+/* The footer sunrise. The SunriseFooter component moves --rise from 0 to 1 as the
+   page reaches its end, and --sun-shift slides the sun along the name. */
+.sunrise {
+  --rise: 1;
+  --sun-shift: 0;
+  --unit: min(1cqw, 19.2px);
+  --sun-radius: calc(var(--unit) * 40);
+  --hill-height: calc(var(--unit) * 5);
+  --sun-drop: calc((1 - var(--rise)) * var(--sun-radius) * 1.1);
+  container-type: inline-size;
+}
+
+@media (min-width: 640px) {
+  .sunrise {
+    --sun-radius: calc(var(--unit) * 26);
+  }
+}
+
+/* Fades the rays out before the top of the footer, so they never end in a hard line. */
+.sunrise::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 auto;
+  height: 14rem;
+  background: linear-gradient(to bottom, var(--brand-ink) 15%, transparent);
+}
+
+.sunrise-sky {
+  position: relative;
+  height: calc(var(--sun-radius) + var(--unit) * 6);
+  /* A finger sliding sideways moves the sun, and up or down still scrolls the page. */
+  touch-action: pan-y;
+}
+
+.sunrise-word {
+  position: absolute;
+  inset-inline: 0;
+  bottom: calc(var(--unit) * 1);
+  font-size: calc(var(--unit) * 23);
+  line-height: 1;
+  text-align: center;
+}
+
+.sunrise-disc {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, #ee9a45, #f8e6ae calc(var(--rise) * 100%)) 30%,
+    color-mix(in oklab, #d9622b, #e2ad45 calc(var(--rise) * 100%)) 100%
+  );
+  clip-path: circle(
+    var(--sun-radius) at calc(50% + var(--sun-shift) * 1%) calc(100% + var(--sun-drop))
+  );
+}
+
+.sunrise-glow,
+.sunrise-rays {
+  position: absolute;
+  z-index: -2;
+  left: 50%;
+  bottom: 0;
+  pointer-events: none;
+  translate: calc(-50% + var(--sun-shift) * 1cqw) calc(50% + var(--sun-drop));
+  will-change: translate, rotate, opacity;
+}
+
+.sunrise-glow {
+  width: calc(var(--sun-radius) * 4.4);
+  aspect-ratio: 1;
+  background: radial-gradient(closest-side, rgba(226, 173, 69, 0.42), rgba(226, 173, 69, 0));
+  opacity: var(--rise);
+}
+
+.sunrise-rays {
+  width: calc(var(--sun-radius) * 4.8);
+  aspect-ratio: 1;
+  background: repeating-conic-gradient(
+    rgba(228, 192, 106, 0.2) 0 0.9deg,
+    transparent 1.3deg 5.6deg,
+    rgba(228, 192, 106, 0.2) 6deg
+  );
+  mask-image: radial-gradient(closest-side, #000 36%, transparent);
+  opacity: var(--rise);
+  rotate: calc(var(--rise) * 18deg);
+}
+
+.sunrise-hill,
+.sunrise-rim {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: var(--hill-height);
+  clip-path: ellipse(75% 100% at 50% 100%);
+}
+
+/* Runs one pixel past the sky, so no line of sunlight shows above the copyright bar. */
+.sunrise-hill {
+  bottom: -1px;
+  height: calc(var(--hill-height) + 1px);
+  background: #0c1811;
+}
+
+/* The sun lights the top edge of the hill in front of it. */
+.sunrise-rim {
+  bottom: 1.5px;
+  background: radial-gradient(
+    ellipse 40% 100% at calc(50% + var(--sun-shift) * 1%) 0,
+    #f8e6ae,
+    transparent
+  );
+  opacity: var(--rise);
 }
 
 /* Entrance animations, started by the Reveal component. */

@@ -1,28 +1,10 @@
 import Link from "next/link";
 import ArrowIcon from "@/components/ui/ArrowIcon";
+import RisingWord from "@/components/ui/RisingWord";
 import GrainPour from "./GrainPour";
 import { heroContent } from "./heroContent";
 
 const { headline, text, primaryButton, secondaryButton } = heroContent;
-
-type RisingWordProps = {
-  word: string;
-  delay: number;
-  className?: string;
-};
-
-function RisingWord({ word, delay, className = "animate-rise" }: RisingWordProps) {
-  return (
-    <span className="pointer-events-auto mb-[-0.22em] inline-block overflow-hidden pb-[0.22em] align-bottom">
-      <span
-        style={{ animationDelay: `${delay}ms` }}
-        className={`inline-block motion-reduce:animate-none ${className}`}
-      >
-        {word}
-      </span>
-    </span>
-  );
-}
 
 export default function Hero() {
   const mainWords = headline.main.split(" ");
@@ -42,7 +24,7 @@ export default function Hero() {
           <RisingWord
             word={headline.accent}
             delay={120 + mainWords.length * 130}
-            className="animate-rise-sheen bg-[linear-gradient(100deg,#946d16_0%,#ad8426_38%,#f2d78e_50%,#ad8426_62%,#946d16_100%)] bg-size-[300%_100%] bg-clip-text pr-[0.08em] text-transparent italic"
+            className="animate-rise-sheen bg-[linear-gradient(100deg,#946d16_0%,#ad8426_38%,#f2d78e_50%,#ad8426_62%,#946d16_100%)] bg-size-[300%_100%] -mb-[0.3em] -ml-[0.25em] bg-clip-text pr-[0.08em] pb-[0.3em] pl-[0.25em] text-transparent italic"
           />
         </h1>
 

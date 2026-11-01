@@ -32,10 +32,20 @@
     sheen 2.6s ease-in-out 0.9s both;
   --animate-fade-up: fade-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
   --animate-plant: plant 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-marquee: marquee 38s linear infinite;
+
+  @keyframes marquee {
+    from {
+      translate: 0 0;
+    }
+    to {
+      translate: -50% 0;
+    }
+  }
 
   @keyframes rise {
     from {
-      transform: translateY(105%);
+      transform: translateY(145%);
     }
     to {
       transform: translateY(0);
@@ -252,5 +262,274 @@ body {
   }
   to {
     scale: 1 1;
+  }
+}
+
+[data-reveal="waiting"] .reveal-draw {
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 1;
+  opacity: 0;
+}
+
+[data-reveal="shown"] .reveal-draw {
+  stroke-dasharray: 1 2;
+  animation: draw-stroke 1.6s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+/* Draws an SVG line in from start to end. Give each shape pathLength="1". */
+@keyframes draw-stroke {
+  from {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+/* About page: the wheat field in the hero. Each stalk grows up, its ear opens,
+   and then it sways in the wind for good. WheatField bends each stalk away from the cursor. */
+.wheat-sway {
+  animation: wheat-sway var(--sway-time) ease-in-out var(--sway-delay) infinite alternate;
+}
+
+.wheat-grow {
+  stroke-dasharray: 1 2;
+  animation: wheat-grow 1.5s cubic-bezier(0.3, 0.7, 0.25, 1) both;
+}
+
+.wheat-ear {
+  transform-origin: 0 0;
+  animation: wheat-ear 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes wheat-sway {
+  from {
+    rotate: -2.5deg;
+  }
+  to {
+    rotate: 2.5deg;
+  }
+}
+
+@keyframes wheat-grow {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes wheat-ear {
+  from {
+    scale: 0;
+  }
+  to {
+    scale: 1;
+  }
+}
+
+/* About page: the turning sun rays behind the numbers. */
+.sun-rays {
+  width: 150rem;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: repeating-conic-gradient(
+    rgba(228, 192, 106, 0.09) 0 1deg,
+    transparent 1.5deg 7deg,
+    rgba(228, 192, 106, 0.09) 7.5deg
+  );
+  mask-image: radial-gradient(closest-side, #000 25%, transparent);
+  animation: sun-turn 160s linear infinite;
+}
+
+@keyframes sun-turn {
+  to {
+    rotate: 1turn;
+  }
+}
+
+/* Words in a ScrollLitText light up one after another as --lit goes from 0 to 1. */
+.scroll-lit {
+  --lit: 1;
+}
+
+.scroll-lit > span {
+  opacity: clamp(0.16, calc(var(--lit) * (var(--count) + 6) - var(--i)), 1);
+  transition: opacity 0.25s;
+}
+
+/* Contact page: the sprouting field in the hero. Each seed drops into its furrow, the stem grows,
+   the leaves open, and then it sways for good while pollen drifts above. */
+.sprout-furrow {
+  stroke-dasharray: 1 2;
+  animation: wheat-grow 1.4s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+.sprout-seed {
+  animation: seed-drop 0.75s cubic-bezier(0.5, 0, 0.75, 0) both;
+}
+
+.sprout-stem {
+  stroke-dasharray: 1 2;
+  animation: wheat-grow 0.9s cubic-bezier(0.3, 0.7, 0.25, 1) both;
+}
+
+.sprout-leaf {
+  transform-origin: 0 0;
+  animation: wheat-ear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.sprout-sway {
+  transform-origin: 0 0;
+  animation: wheat-sway var(--sway-time) ease-in-out var(--sway-delay) infinite alternate;
+}
+
+.sprout-pollen {
+  animation: pollen-drift 9s ease-in-out infinite;
+}
+
+/* The patch of soil under the seedling once the form is sent. */
+.sent-soil {
+  transform-origin: 60px 118px;
+  animation: wheat-ear 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes seed-drop {
+  from {
+    translate: 0 -150px;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  75% {
+    translate: 0 0;
+  }
+  88% {
+    translate: 0 -5px;
+  }
+  to {
+    translate: 0 0;
+    opacity: 1;
+  }
+}
+
+@keyframes pollen-drift {
+  from {
+    translate: 0 0;
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.8;
+  }
+  to {
+    translate: 36px -100px;
+    opacity: 0;
+  }
+}
+
+@keyframes nudge-down {
+  0%,
+  60%,
+  100% {
+    translate: 0 0;
+  }
+  30% {
+    translate: 0 4px;
+  }
+}
+
+/* Contact page: the map. Trees pop up, the pin drops in, and rings spread from its foot. */
+[data-reveal="waiting"] .reveal-pop {
+  scale: 0;
+}
+
+[data-reveal="waiting"] .reveal-drop {
+  opacity: 0;
+}
+
+[data-reveal="shown"] .reveal-pop {
+  animation: wheat-ear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+[data-reveal="shown"] .reveal-drop {
+  animation: pin-drop 0.8s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+
+.map-pulse {
+  transform-origin: 0 0;
+  animation: map-pulse 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+@keyframes pin-drop {
+  from {
+    translate: 0 -70px;
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  to {
+    translate: 0 0;
+    opacity: 1;
+  }
+}
+
+@keyframes map-pulse {
+  from {
+    scale: 0.4;
+    opacity: 0.7;
+  }
+  to {
+    scale: 2.4;
+    opacity: 0;
+  }
+}
+
+/* Contact page: FAQ answers slide open, in browsers that can animate to auto height. */
+.faq-item {
+  interpolate-size: allow-keywords;
+}
+
+.faq-item::details-content {
+  block-size: 0;
+  overflow: hidden;
+  transition:
+    block-size 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    content-visibility 0.5s allow-discrete;
+}
+
+.faq-item[open]::details-content {
+  block-size: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wheat-sway,
+  .wheat-grow,
+  .wheat-ear,
+  .sun-rays,
+  .sprout-furrow,
+  .sprout-seed,
+  .sprout-stem,
+  .sprout-leaf,
+  .sprout-sway,
+  .sent-soil,
+  .map-pulse {
+    animation: none;
+  }
+
+  .sprout-pollen,
+  .map-pulse {
+    display: none;
+  }
+
+  .faq-item::details-content {
+    transition: none;
   }
 }

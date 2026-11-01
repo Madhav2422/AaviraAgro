@@ -6,7 +6,7 @@ import FooterLink from "./FooterLink";
 import SunriseFooter from "./SunriseFooter";
 import { footerContact, footerContent } from "./footerContent";
 
-const { text, exploreTitle, contactTitle, wordmark, copyright, tagline } = footerContent;
+const { text, exploreTitle, contactTitle, wordmark, copyright, tagline, credit } = footerContent;
 
 const titleStyle = "font-display text-xl text-background";
 const wordStyle = "sunrise-word font-serif font-black";
@@ -66,9 +66,20 @@ export default function Footer() {
       </div>
 
       <div className="relative bg-[#0c1811]">
-        <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-1.5 px-5 pt-1 pb-6 text-center text-[13.5px] text-background/60 sm:flex-row sm:justify-between sm:px-8 sm:text-left xl:px-6">
+        <div className="mx-auto grid w-full max-w-7xl items-baseline gap-x-8 gap-y-1.5 px-5 pt-1 pb-6 text-center text-[13.5px] text-background/60 sm:grid-cols-[1fr_auto] sm:px-8 sm:text-left lg:grid-cols-[1fr_auto_1fr] xl:px-6">
           <p>{copyright}</p>
           <p className="font-display text-[15px] text-brand-wheat italic">{tagline}</p>
+          <p className="text-xs sm:col-span-2 sm:text-center lg:col-span-1 lg:text-right">
+            {credit.text}{" "}
+            <a
+              href={credit.href}
+              target="_blank"
+              rel="noopener"
+              className="underline decoration-background/25 underline-offset-2 transition-colors hover:text-brand-wheat hover:decoration-brand-wheat"
+            >
+              {credit.label}
+            </a>
+          </p>
         </div>
       </div>
     </SunriseFooter>

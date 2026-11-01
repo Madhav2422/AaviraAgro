@@ -6,6 +6,12 @@ export const footerContent = {
   wordmark: "AVVIRA",
   copyright: `© ${new Date().getFullYear()} Avvira Agro Industries. All rights reserved.`,
   tagline: "Growing Value Naturally",
+  // The small line at the very bottom of the footer.
+  credit: {
+    text: "Designed and developed by",
+    label: "fluxoninfotech.com",
+    href: "https://www.fluxoninfotech.com",
+  },
 };
 
 export type FooterContact = {

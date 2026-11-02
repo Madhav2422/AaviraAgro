@@ -82,7 +82,7 @@ export default function VoyageStage() {
       const offset = parseFloat(style.top) || 0;
       const { top, height: trackHeight } = track.getBoundingClientRect();
       const room = trackHeight - stage.clientHeight;
-      return room > 0 ? Math.max(0, Math.min(1, (offset - top) / room)) : 1;
+      return room > 0 ? Math.max(0, Math.min(1, (offset - top) / room)) : 0;
     };
 
     const draw = () => {
@@ -121,9 +121,11 @@ export default function VoyageStage() {
         draw();
         return;
       }
+      // The track grows to its full length first, so the first frame matches the scroll.
+      // Measured the other way round, the story would race through once on arrival.
+      track.dataset.playing = "true";
       progress = scrollGoal();
       draw();
-      track.dataset.playing = "true";
       const observer = new IntersectionObserver(([entry]) => {
         inView = entry.isIntersecting;
         if (inView && !frameId) {

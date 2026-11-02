@@ -5,11 +5,15 @@ import { cargoOnShip } from "../cargo";
 import {
   CONTAINER_W,
   CREAM,
+  BOW_HATCH,
+  BOW_POST,
   DOCK_X,
+  FUNNEL_TOP,
   GOLD,
   INK,
   QUAY_Y,
   drawContainer,
+  drawDeckhand,
   drawGantry,
   drawPerson,
   drawShip,
@@ -120,7 +124,7 @@ function cameraAt(
   const scale = lerp(lerp(near, sailing, leave), fit(portrait ? 1900 : 2500, 1100), land);
 
   // On a tall phone the camera has to follow the work, since it cannot show it all at once.
-  const follow = portrait ? 0.86 : 0.22;
+  const follow = portrait ? 0.86 : 0.08;
   const working = lerp(-30, lerp(40, focusX, follow), pushIn);
   const x = lerp(working, shipX + (portrait ? 30 : 110), leave);
 
@@ -354,9 +358,25 @@ function drawHarbour(ctx: CanvasRenderingContext2D, frame: Frame, state: ReturnT
 
   // The crew on the quay, with hands going up as the ship leaves.
   const goodbye = smooth(between(frame.progress, 0.62, 0.68));
-  const walker = wrap(time * 26, 520);
-  drawPerson(ctx, -860 + walker, QUAY_Y, { step: time * 6 }, time);
-  drawPerson(ctx, -1040 + wrap(time * 17, 300), QUAY_Y, { step: time * 5, vest: GOLD }, time);
+
+  // A checker walks slowly up and down by the yard, slowing at each turn.
+  const beat = wrap(time / 18, 1);
+  const checker = lerp(-870, -830, smooth(1 - Math.abs(beat * 2 - 1)));
+  drawPerson(ctx, checker, QUAY_Y, { step: checker * 0.4, wave: goodbye }, time);
+
+  // The signaller walks over as each truck pulls up, waves the crane down onto the
+  // container, and walks back once it has been lifted away.
+  const { step } = state;
+  const atTruck = smooth(between(step, 0.06, 0.24)) - smooth(between(step, 0.5, 0.72));
+  const walking = (step > 0.06 && step < 0.24) || (step > 0.5 && step < 0.72);
+  const signal = between(step, 0.24, 0.28) * (1 - between(step, 0.44, 0.48));
+  drawPerson(
+    ctx,
+    lerp(-800, -726, atTruck),
+    QUAY_Y,
+    { step: walking ? lerp(-800, -726, atTruck) * 0.4 : undefined, wave: Math.max(signal, goodbye), vest: GOLD },
+    time,
+  );
   drawPerson(ctx, -500, QUAY_Y, { wave: Math.max(0.55 * (1 - goodbye), goodbye), vest: GOLD }, time);
   drawPerson(ctx, -462, QUAY_Y, { wave: goodbye }, time);
   drawPerson(ctx, -428, QUAY_Y, { wave: goodbye, vest: "#2f5a73" }, time);
@@ -409,7 +429,7 @@ function drawSmoke(ctx: CanvasRenderingContext2D, frame: Frame, shipX: number, s
   for (let puff = 0; puff < 9; puff++) {
     const age = wrap(time * 0.5 + puff / 9, 1);
     const x = shipX - 595 - age * (120 + speed * 300);
-    const y = -480 - age * 150;
+    const y = FUNNEL_TOP - 16 - age * 150;
     const radius = 16 + age * 58;
     const puffGlow = ctx.createRadialGradient(x, y, 0, x, y, radius);
     puffGlow.addColorStop(0, `rgba(245, 236, 216, ${(1 - age) * 0.34 * strength})`);
@@ -642,8 +662,25 @@ export function drawVoyage(ctx: CanvasRenderingContext2D, frame: Frame) {
   ctx.rotate(Math.sin(time * 0.7) * lerp(0.0008, 0.0034, state.speed));
   const night = between(progress, 0.74, 0.82) * (1 - between(progress, 0.9, 0.96));
   drawShip(ctx, { fonts, cargo: cargoOnShip, loaded: state.loaded, time, night });
-  // A deckhand at the bow, waving as the ship pulls away.
-  drawPerson(ctx, 620, -212, { wave: smooth(between(progress, 0.62, 0.68)), vest: GOLD }, time);
+  // The deckhand waves the quay goodbye, goes below through the hatch for the voyage,
+  // and climbs back up to wave the far port in.
+  const returning = progress > 0.85;
+  const toHatch = returning
+    ? 1 - smooth(between(progress, 0.945, 0.96))
+    : smooth(between(progress, 0.68, 0.71));
+  const sink = returning ? 1 - between(progress, 0.925, 0.945) : between(progress, 0.71, 0.735);
+  const farewell = smooth(between(progress, 0.6, 0.63)) * (1 - smooth(between(progress, 0.665, 0.68)));
+  const welcome = smooth(between(progress, 0.96, 0.975));
+  drawDeckhand(
+    ctx,
+    {
+      x: lerp(BOW_POST, BOW_HATCH, toHatch),
+      sink,
+      wave: returning ? welcome : farewell,
+      walking: toHatch > 0 && toHatch < 1,
+    },
+    time,
+  );
 
   toWorld();
   drawMooring(ctx, state.shipX, state.castOff);

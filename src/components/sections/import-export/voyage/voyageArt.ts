@@ -13,6 +13,17 @@ export const BAYS = [-340, -190, -40, 110, 260, 410];
 const DECK_Y = -158;
 const TRUCK_BED = 34;
 
+// The white block at the back holds the crew's cabins, with the bridge on top where the
+// ship is steered. Three floors keep it in proportion with the cargo.
+const BRIDGE_LEVELS = 3;
+const BRIDGE_LEVEL = 46;
+const BRIDGE_TOP = DECK_Y - BRIDGE_LEVELS * BRIDGE_LEVEL;
+export const FUNNEL_TOP = BRIDGE_TOP - 96;
+
+// The deckhand's spot near the bow, and the hatch he uses to go below deck.
+export const BOW_POST = 668;
+export const BOW_HATCH = 632;
+
 export const truckBedTop = -TRUCK_BED - CONTAINER_H;
 
 // The top edge of a container sitting in this tier on the ship.
@@ -159,9 +170,9 @@ function drawHull(ctx: CanvasRenderingContext2D, fonts: Fonts) {
 function drawBridge(ctx: CanvasRenderingContext2D, time: number, night: number) {
   const left = -640;
   const width = 192;
-  const levels = 5;
-  const level = 42;
-  const top = DECK_Y - levels * level;
+  const levels = BRIDGE_LEVELS;
+  const level = BRIDGE_LEVEL;
+  const top = BRIDGE_TOP;
 
   // The funnel stands behind the decks.
   ctx.fillStyle = GOLD;
@@ -188,7 +199,7 @@ function drawBridge(ctx: CanvasRenderingContext2D, time: number, night: number) 
       // Most cabins light up after dark, but never all of them.
       const lit = (row * 3 + window * 5) % 4 !== 0;
       ctx.fillStyle = lit && night > 0.4 ? `rgba(248, 208, 120, ${night})` : INK;
-      ctx.fillRect(left + 14 + window * 25, y + 13, 13, 12);
+      ctx.fillRect(left + 14 + window * 25, y + 16, 13, 12);
     }
   }
 
@@ -256,6 +267,7 @@ export function drawShip(
   shadeStack(485, cargoTop(0));
 
   drawHull(ctx, fonts);
+  drawHatch(ctx);
 
   // The navigation lights: red on the bow, white high on the mast.
   if (night > 0) {
@@ -265,9 +277,49 @@ export function drawShip(
     ctx.fill();
     ctx.fillStyle = `rgba(250, 240, 214, ${night * (0.6 + Math.sin(time * 3) * 0.4)})`;
     ctx.beginPath();
-    ctx.arc(-516, DECK_Y - 370, 4, 0, Math.PI * 2);
+    ctx.arc(-516, BRIDGE_TOP - 134, 4, 0, Math.PI * 2);
     ctx.fill();
   }
+}
+
+// The top of the bow, which rises gently towards the tip.
+const bowDeck = (x: number) => DECK_Y - 40 - ((x - 582) * 14) / 118;
+
+function drawHatch(ctx: CanvasRenderingContext2D) {
+  const top = bowDeck(BOW_HATCH) - 15;
+  ctx.fillStyle = INK_SOFT;
+  ctx.fillRect(BOW_HATCH - 12, top, 24, 17);
+  ctx.fillStyle = GOLD;
+  ctx.fillRect(BOW_HATCH - 14, top - 3, 28, 3);
+}
+
+type DeckhandPose = {
+  x: number;
+  // 0 standing on deck, 1 gone down through the hatch.
+  sink: number;
+  wave: number;
+  walking: boolean;
+};
+
+// Draws the deckhand on the bow. Call it after drawShip, in the same place.
+export function drawDeckhand(
+  ctx: CanvasRenderingContext2D,
+  { x, sink, wave, walking }: DeckhandPose,
+  time: number,
+) {
+  if (sink >= 1) return;
+  const deck = bowDeck(BOW_HATCH);
+
+  // Anything below the deck is hidden, so he climbs down out of sight.
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(x - 40, deck - 120, 80, 120);
+  ctx.clip();
+  drawPerson(ctx, x, bowDeck(x) + sink * 56, { step: walking ? x * 0.4 : undefined, wave, vest: GOLD }, time);
+  ctx.restore();
+
+  // The hatch is drawn again in front of him, so he steps into it.
+  drawHatch(ctx);
 }
 
 function drawLeg(ctx: CanvasRenderingContext2D, x: number) {
@@ -440,7 +492,7 @@ export function drawTruck(
 }
 
 type PersonOptions = {
-  // Set while walking; the legs swing with it.
+  // Set while walking, and the legs swing with it. Left out, the person stands with feet apart.
   step?: number;
   // 0 is arms down, 1 is one arm waving high.
   wave?: number;
@@ -451,10 +503,10 @@ export function drawPerson(
   ctx: CanvasRenderingContext2D,
   x: number,
   ground: number,
-  { step = 0, wave = 0, vest = RUST }: PersonOptions,
+  { step, wave = 0, vest = RUST }: PersonOptions,
   time: number,
 ) {
-  const swing = Math.sin(step) * 6;
+  const swing = step === undefined ? 3.4 : Math.sin(step) * 6;
 
   ctx.strokeStyle = INK;
   ctx.lineCap = "round";

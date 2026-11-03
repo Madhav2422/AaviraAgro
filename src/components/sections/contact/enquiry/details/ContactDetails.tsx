@@ -1,3 +1,4 @@
+import EmailText from "@/components/ui/EmailText";
 import Reveal from "@/components/ui/Reveal";
 import DetailIcon from "./DetailIcon";
 import { contactDetails, detailsContent } from "./detailsContent";
@@ -38,8 +39,8 @@ export default function ContactDetails() {
                 <span className="block text-[12px] font-semibold tracking-[0.18em] text-background/55 uppercase">
                   {detail.title}
                 </span>
-                <span className="mt-1 block text-[16px] text-background transition-colors group-hover:text-brand-wheat">
-                  {detail.label}
+                <span className="mt-1 block text-[16px] wrap-anywhere text-background transition-colors group-hover:text-brand-wheat">
+                  <EmailText text={detail.label} />
                 </span>
               </span>
             </>

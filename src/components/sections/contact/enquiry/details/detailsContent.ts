@@ -16,11 +16,11 @@ export type ContactDetail = {
   href?: string;
 };
 
-// Waiting for the client's real details, keep these in step with footerContent.ts.
-// Add an href to make a line clickable, for example "tel:+910000000000" or "mailto:name@example.com".
+// From the client's letterhead. Keep these in step with footerContent.ts. An href makes a line clickable.
+// The working hours are not on the letterhead, so they still need the client's confirmation.
 export const contactDetails: ContactDetail[] = [
-  { icon: "phone", title: "Call Us", label: "Phone number to be added" },
-  { icon: "email", title: "Email Us", label: "Email to be added" },
-  { icon: "address", title: "Visit Us", label: "Address to be added" },
+  { icon: "phone", title: "Call Us", label: "+91 22 4603 8109", href: "tel:+912246038109" },
+  { icon: "email", title: "Email Us", label: "support@avviraagroindustries.com", href: "mailto:support@avviraagroindustries.com" },
+  { icon: "address", title: "Visit Us", label: "Office No. 1001, Plot No. E/3A, Sec-12, Kharghar, Mumbai – 410210" },
   { icon: "hours", title: "Working Hours", label: "Mon to Sat, 9:30 am to 6:30 pm" },
 ];

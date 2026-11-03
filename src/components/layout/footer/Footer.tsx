@@ -1,5 +1,6 @@
 import Logo from "@/components/layout/navbar/Logo";
 import { navLinks } from "@/components/layout/navbar/navLinks";
+import EmailText from "@/components/ui/EmailText";
 import Reveal from "@/components/ui/Reveal";
 import ContactIcon from "./ContactIcon";
 import FooterLink from "./FooterLink";
@@ -38,11 +39,11 @@ export default function Footer() {
               <li key={item.icon} className="flex items-start gap-3">
                 <ContactIcon icon={item.icon} className="mt-0.5 size-5 shrink-0 text-brand-wheat" />
                 {item.href ? (
-                  <a href={item.href} className="transition-colors hover:text-brand-wheat">
-                    {item.label}
+                  <a href={item.href} className="wrap-anywhere transition-colors hover:text-brand-wheat">
+                    <EmailText text={item.label} />
                   </a>
                 ) : (
-                  <span>{item.label}</span>
+                  <span className="wrap-anywhere">{item.label}</span>
                 )}
               </li>
             ))}

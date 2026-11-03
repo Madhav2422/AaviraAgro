@@ -6,13 +6,14 @@ export const heroContent = {
     accent: "Naturally.",
   },
   text: "We manufacture, process and supply wheat, rice, pulses and spices, so your business gets quality it can count on, season after season.",
-  primaryButton: { label: "Browse Products", href: "/products" },
-  secondaryButton: { label: "Get in Touch", href: "/contact" },
+  primaryButton: { label: "Get in Touch", href: "/contact" },
+  secondaryButton: { label: "About Us", href: "/about" },
 };
 
 export type GrainPile = {
   label: string;
-  href: string;
+  // Add a link once the page exists, for example "/products", to make the tag clickable.
+  href?: string;
   // Where the pile sits across the page: 0 is the left edge, 1 is the right edge.
   position: number;
   // How tall the pile grows: 1 is the tallest allowed.
@@ -27,7 +28,6 @@ export type GrainPile = {
 export const grainPiles: GrainPile[] = [
   {
     label: "Wheat",
-    href: "/products",
     position: 0.13,
     height: 0.9,
     depth: 2,
@@ -35,7 +35,6 @@ export const grainPiles: GrainPile[] = [
   },
   {
     label: "Rice",
-    href: "/products",
     position: 0.38,
     height: 1,
     depth: 1,
@@ -43,7 +42,6 @@ export const grainPiles: GrainPile[] = [
   },
   {
     label: "Pulses",
-    href: "/products",
     position: 0.61,
     height: 0.86,
     depth: 3,
@@ -51,7 +49,6 @@ export const grainPiles: GrainPile[] = [
   },
   {
     label: "Spices",
-    href: "/products",
     position: 0.9,
     height: 0.76,
     depth: 0,

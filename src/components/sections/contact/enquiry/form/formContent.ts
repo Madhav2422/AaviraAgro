@@ -10,8 +10,8 @@ export const formContent = {
   sending: "Sending",
   invalid: "A few details need another look.",
   sent: {
-    heading: "Your message is planted.",
-    text: "Thank you for reaching out. Someone from our team will get back to you soon.",
+    heading: "Message sent.",
+    text: "Thank you for reaching out. We will get back to you shortly.",
     again: "Send another message",
   },
 };

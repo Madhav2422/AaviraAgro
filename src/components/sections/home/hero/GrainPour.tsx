@@ -72,24 +72,33 @@ export default function GrainPour() {
 
       {peaks.length > 0 && (
         <div className="pointer-events-none absolute inset-0 z-20">
-          {grainPiles.map((pile, index) => (
-            <Link
-              key={pile.label}
-              href={pile.href}
-              onPointerEnter={() => controlsRef.current?.pourOn(index)}
-              style={{
+          {grainPiles.map((pile, index) => {
+            const tag = {
+              onPointerEnter: () => controlsRef.current?.pourOn(index),
+              style: {
                 left: `${pile.position * 100}%`,
                 bottom: `${peaks[index] - 10}px`,
                 animationDelay: `${index * 110}ms`,
-              }}
-              className="group pointer-events-auto absolute flex -translate-x-1/2 animate-plant flex-col items-center motion-reduce:animate-none"
-            >
-              <span className="rounded-[3px] border border-brand-ink/15 bg-[#fffaf0] px-2.5 py-0.5 font-display text-[13px] text-brand-ink italic shadow-[0_6px_14px_-8px_rgba(20,38,27,0.6)] transition-transform duration-300 group-hover:-rotate-3 sm:px-3.5 sm:py-1 sm:text-[15px]">
-                {pile.label}
-              </span>
-              <span className="h-6 w-0.5 bg-brand-ink/55 sm:h-9" />
-            </Link>
-          ))}
+              },
+              className:
+                "group pointer-events-auto absolute flex -translate-x-1/2 animate-plant flex-col items-center motion-reduce:animate-none",
+              children: (
+                <>
+                  <span className="rounded-[3px] border border-brand-ink/15 bg-[#fffaf0] px-2.5 py-0.5 font-display text-[13px] text-brand-ink italic shadow-[0_6px_14px_-8px_rgba(20,38,27,0.6)] transition-transform duration-300 group-hover:-rotate-3 sm:px-3.5 sm:py-1 sm:text-[15px]">
+                    {pile.label}
+                  </span>
+                  <span className="h-6 w-0.5 bg-brand-ink/55 sm:h-9" />
+                </>
+              ),
+            };
+
+            // A tag without a page to go to still pours more grain when hovered.
+            return pile.href ? (
+              <Link key={pile.label} href={pile.href} {...tag} />
+            ) : (
+              <span key={pile.label} {...tag} />
+            );
+          })}
         </div>
       )}
     </>

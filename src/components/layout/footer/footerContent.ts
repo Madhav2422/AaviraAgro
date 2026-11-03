@@ -20,10 +20,10 @@ export type FooterContact = {
   href?: string;
 };
 
-// Waiting for the client's real details. Add an href to make a line clickable,
-// for example "tel:+910000000000" or "mailto:name@example.com".
+// From the client's letterhead. Keep these in step with detailsContent.ts on the Contact page.
+// An href makes a line clickable.
 export const footerContact: FooterContact[] = [
-  { icon: "address", label: "Address to be added" },
-  { icon: "phone", label: "Phone number to be added" },
-  { icon: "email", label: "Email to be added" },
+  { icon: "address", label: "Office No. 1001, Plot No. E/3A, Sec-12, Kharghar, Mumbai – 410210" },
+  { icon: "phone", label: "+91 22 4603 8109", href: "tel:+912246038109" },
+  { icon: "email", label: "support@avviraagroindustries.com", href: "mailto:support@avviraagroindustries.com" },
 ];

@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 
-// How far the sun can slide along the name under the cursor, as a share of the width.
+// How far the emblem can slide along the name under the cursor, as a share of the width.
 const MAX_SHIFT = 27;
 
-// Phones have no cursor, so there the sun drifts slowly from side to side by itself.
+// Phones have no cursor, so there the emblem drifts slowly from side to side by itself.
 const SWAY_SHIFT = 14;
 const SWAY_SECONDS = 9;
 
@@ -76,7 +76,7 @@ export default function SunriseFooter({ children, className }: SunriseFooterProp
       updateSway();
     });
 
-    // A cursor or a finger steers the sun, and the sway picks up again afterwards.
+    // A cursor or a finger steers the emblem, and the sway picks up again afterwards.
     const handlePointerMove = (event: PointerEvent) => {
       const { left, width } = sky.getBoundingClientRect();
       steering = true;

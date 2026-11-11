@@ -1,23 +1,70 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 
 type LogoProps = {
   // Uses lighter text for dark backgrounds, like the footer.
   onDark?: boolean;
+  // Turns the coin in the middle of the emblem over every few seconds.
+  turningCoin?: boolean;
 };
 
-export default function Logo({ onDark = false }: LogoProps) {
+// The emblem is two pictures: the ring of wheat, leaf and arrow, and the coin on its own
+// under it, so the coin can turn. COIN is where the coin sits, in pixels of the emblem.
+const EMBLEM = { width: 213, height: 221 };
+const COIN = { left: 57, top: 46, width: 130, height: 134 };
+const coinBox: CSSProperties = {
+  left: `${(COIN.left / EMBLEM.width) * 100}%`,
+  top: `${(COIN.top / EMBLEM.height) * 100}%`,
+  width: `${(COIN.width / EMBLEM.width) * 100}%`,
+  height: `${(COIN.height / EMBLEM.height) * 100}%`,
+};
+const coinSrc = "/images/avvira-emblem-coin.png";
+
+// Thin gold discs between the coin's two faces, which show as its edge while it turns.
+const EDGE_LAYERS = 7;
+
+export default function Logo({ onDark = false, turningCoin = false }: LogoProps) {
   return (
     <Link href="/" className="flex w-fit items-center gap-3">
       {/* Change the logo size here: h-14 on phones, xl:h-16 on desktop. */}
-      <Image
-        src="/images/avvira-emblem.png"
-        alt=""
-        width={213}
-        height={221}
-        loading="eager"
-        className="h-14 w-auto xl:h-16"
-      />
+      <span className="relative block aspect-[213/221] h-14 shrink-0 xl:h-16">
+        <span style={coinBox} className="absolute">
+          {turningCoin ? (
+            <span className="logo-coin">
+              <span className="logo-coin-turn">
+                {Array.from({ length: EDGE_LAYERS }, (_, layer) => (
+                  <span
+                    key={layer}
+                    style={{ "--layer": layer / (EDGE_LAYERS - 1) } as CSSProperties}
+                    className="logo-coin-edge"
+                  />
+                ))}
+                <Image src={coinSrc} alt="" width={COIN.width} height={COIN.height} loading="eager" className="logo-coin-face" />
+                <Image
+                  src={coinSrc}
+                  alt=""
+                  width={COIN.width}
+                  height={COIN.height}
+                  loading="eager"
+                  className="logo-coin-face logo-coin-back"
+                />
+              </span>
+            </span>
+          ) : (
+            <Image src={coinSrc} alt="" width={COIN.width} height={COIN.height} loading="eager" className="size-full" />
+          )}
+        </span>
+        {/* The ring lies over the coin, so the leaf stays in front of it. */}
+        <Image
+          src="/images/avvira-emblem-ring.png"
+          alt=""
+          width={EMBLEM.width}
+          height={EMBLEM.height}
+          loading="eager"
+          className="absolute inset-0 size-full"
+        />
+      </span>
       <span className="flex flex-col">
         <span
           className={`font-serif text-[26px] leading-none font-semibold tracking-wide uppercase xl:text-[30px] ${

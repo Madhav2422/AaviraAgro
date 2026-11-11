@@ -22,6 +22,7 @@ import {
   drawTruck,
   type Fonts,
 } from "./voyageArt";
+import { EMBLEM_BOX, EMBLEM_PATH } from "./emblemPath";
 import { TRAVEL, between, lerp, smooth, timelineAt } from "./voyageTimeline";
 
 type Color = [number, number, number];
@@ -167,8 +168,56 @@ function sunAt(progress: number, width: number, horizon: number, size: number) {
   };
 }
 
+// The Avvira emblem shines in place of the sun, as wide as the sun was.
+const EMBLEM_SPAN = 2;
+// Room around the emblem's outline for the line drawn along its edge, in the outline's units.
+const EMBLEM_MARGIN = 1;
+
+type EmblemPictures = { width: number; morning: HTMLCanvasElement; sunset: HTMLCanvasElement };
+let emblemPictures: EmblemPictures | null = null;
+
+// The emblem's outline is slow to paint, so it is painted once into two pictures, one in
+// morning colours and one in sunset colours, and only again when the screen size changes.
+function emblemPicturesAt(width: number) {
+  if (emblemPictures?.width === width) return emblemPictures;
+
+  const outline = new Path2D(EMBLEM_PATH);
+  const scale = width / EMBLEM_BOX.width;
+  const fade = (art: CanvasRenderingContext2D, top: Color, bottom: Color) => {
+    const gradient = art.createLinearGradient(0, EMBLEM_BOX.y, 0, EMBLEM_BOX.y + EMBLEM_BOX.height);
+    gradient.addColorStop(0, css(top));
+    gradient.addColorStop(1, css(bottom));
+    return gradient;
+  };
+  const paint = (top: Color, bottom: Color, lineTop: Color, lineBottom: Color) => {
+    const picture = document.createElement("canvas");
+    picture.width = Math.ceil((EMBLEM_BOX.width + EMBLEM_MARGIN * 2) * scale);
+    picture.height = Math.ceil((EMBLEM_BOX.height + EMBLEM_MARGIN * 2) * scale);
+    const art = picture.getContext("2d");
+    if (!art) return picture;
+    art.scale(scale, scale);
+    art.translate(EMBLEM_MARGIN - EMBLEM_BOX.x, EMBLEM_MARGIN - EMBLEM_BOX.y);
+    // A deeper gold picks out the lines inside the emblem, and its edge. It stays soft at the
+    // top, where the heading sits over the emblem.
+    art.strokeStyle = fade(art, lineTop, lineBottom);
+    art.lineWidth = 1.1;
+    art.lineJoin = "round";
+    art.stroke(outline);
+    art.fillStyle = fade(art, top, bottom);
+    art.fill(outline, "evenodd");
+    return picture;
+  };
+
+  emblemPictures = {
+    width,
+    morning: paint([248, 228, 170], [228, 170, 66], [230, 196, 124], [196, 136, 46]),
+    sunset: paint([244, 164, 84], [214, 92, 46], [226, 138, 70], [178, 70, 34]),
+  };
+  return emblemPictures;
+}
+
 function drawSun(ctx: CanvasRenderingContext2D, frame: Frame, horizon: number) {
-  const { width, height, progress, time } = frame;
+  const { width, height, progress, time, pixelRatio } = frame;
   const size = Math.min(Math.max(width, height * 0.9), height * 1.5);
   const sun = sunAt(progress, width, horizon, size);
   const night = between(progress, 0.76, 0.81) * (1 - between(progress, 0.9, 0.94));
@@ -204,13 +253,17 @@ function drawSun(ctx: CanvasRenderingContext2D, frame: Frame, horizon: number) {
   }
   ctx.stroke();
 
-  const disc = ctx.createLinearGradient(0, sun.y - sun.radius, 0, sun.y + sun.radius);
-  disc.addColorStop(0, css(mix([248, 228, 170], [244, 164, 84], warmth)));
-  disc.addColorStop(1, css(mix([228, 170, 66], [214, 92, 46], warmth)));
-  ctx.fillStyle = disc;
-  ctx.beginPath();
-  ctx.arc(sun.x, sun.y, sun.radius, 0, Math.PI * 2);
-  ctx.fill();
+  // The emblem, painted at the biggest the sun gets and drawn smaller when the sun is smaller.
+  // Towards sunset the sunset picture fades in over the morning one.
+  const pictures = emblemPicturesAt(Math.round(size * 0.2 * EMBLEM_SPAN * pixelRatio));
+  const unit = (sun.radius * EMBLEM_SPAN) / EMBLEM_BOX.width;
+  const across = (EMBLEM_BOX.width + EMBLEM_MARGIN * 2) * unit;
+  const down = (EMBLEM_BOX.height + EMBLEM_MARGIN * 2) * unit;
+  ctx.drawImage(pictures.morning, sun.x - across / 2, sun.y - down / 2, across, down);
+  if (warmth > 0) {
+    ctx.globalAlpha = warmth;
+    ctx.drawImage(pictures.sunset, sun.x - across / 2, sun.y - down / 2, across, down);
+  }
   ctx.restore();
 }
 

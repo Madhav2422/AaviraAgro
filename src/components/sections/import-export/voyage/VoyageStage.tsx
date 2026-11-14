@@ -10,6 +10,7 @@ import { chapterAt, type Chapter } from "./voyageTimeline";
 const { eyebrow, heading, text, hint, castOff, dusk, night, arrival, stops } = voyageContent;
 
 const FULL_FRAME_SECONDS = 1 / 45;
+const EMBLEM_SRC = "/images/avvira-emblem-color.svg";
 
 function captionOf(chapter: Chapter) {
   switch (chapter.kind) {
@@ -85,9 +86,26 @@ export default function VoyageStage() {
       return room > 0 ? Math.max(0, Math.min(1, (offset - top) / room)) : 0;
     };
 
+    // The Avvira logo shines in place of the sun. The scene does not wait for its picture: if
+    // it arrives after the first frame, it fades in.
+    const emblem = new Image();
+    let emblemFrom: number | null = null;
+    let started = false;
+
     const draw = () => {
       const wordsEnd = intro.offsetTop + intro.offsetHeight;
-      drawVoyage(ctx, { width, height, pixelRatio, progress, time, fonts, wordsEnd });
+      const emblemShown = emblemFrom === null ? 0 : Math.min(1, (performance.now() - emblemFrom) / 800);
+      drawVoyage(ctx, {
+        width,
+        height,
+        pixelRatio,
+        progress,
+        time,
+        fonts,
+        wordsEnd,
+        emblem: emblemFrom === null ? null : emblem,
+        emblemShown,
+      });
       intro.style.opacity = String(Math.max(0, 1 - progress / 0.035));
       intro.style.visibility = progress > 0.035 ? "hidden" : "visible";
       const voyage = progress < 0.6 ? progress / 1.2 : 0.5 + (progress - 0.6) / 0.7;
@@ -115,7 +133,18 @@ export default function VoyageStage() {
       frameId = inView ? requestAnimationFrame(frame) : 0;
     };
 
+    emblem.src = EMBLEM_SRC;
+    emblem.decode().then(
+      () => {
+        if (cancelled) return;
+        emblemFrom = started && !reduceMotion ? performance.now() : -Infinity;
+        if (started) draw();
+      },
+      () => {},
+    );
+
     const start = () => {
+      started = true;
       resize();
       if (reduceMotion) {
         draw();
@@ -181,7 +210,7 @@ export default function VoyageStage() {
           </h1>
           <p
             style={{ animationDelay: "520ms" }}
-            className="mx-auto mt-5 max-w-xl animate-fade-up text-[16px] leading-relaxed text-balance text-brand-ink/85 motion-reduce:animate-none xl:text-[17px]"
+            className="mx-auto mt-5 max-w-xl animate-fade-up text-[16px] leading-relaxed text-balance text-brand-ink/85 [text-shadow:0_0_10px_var(--background),0_0_3px_var(--background)] motion-reduce:animate-none xl:text-[17px]"
           >
             {text}
           </p>

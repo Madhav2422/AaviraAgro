@@ -54,14 +54,13 @@ export default function Footer() {
       <div data-sky className="sunrise-sky">
         <div className="sunrise-rays" />
         <div className="sunrise-glow" />
-        <p aria-hidden="true" className={`${wordStyle} text-background`}>
+        <div className="sunrise-logo" />
+        <p aria-hidden="true" className={`${wordStyle} sunrise-word-shadow`}>
           {wordmark}
         </p>
-        <div className="sunrise-disc">
-          <p aria-hidden="true" className={`${wordStyle} text-brand-ink`}>
-            {wordmark}
-          </p>
-        </div>
+        <p aria-hidden="true" className={wordStyle}>
+          {wordmark}
+        </p>
         <div className="sunrise-rim" />
         <div className="sunrise-hill" />
       </div>

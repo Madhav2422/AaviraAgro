@@ -237,10 +237,13 @@ body {
   --unit: min(1cqw, 19.2px);
   --sun-radius: calc(var(--unit) * 40);
   --hill-height: calc(var(--unit) * 5);
-  /* The emblem's width, and how high its middle sits once it has risen. */
-  --emblem-width: calc(var(--unit) * 44);
-  --emblem-lift: calc(var(--unit) * 23);
-  /* Before it rises, the emblem waits just out of sight below the hill. */
+  --word-size: calc(var(--unit) * 23);
+  /* The logo rises behind the name, where the sun was: its width, and how high its middle
+     sits once it has risen. The name hides only its lowest part, below the coin's ₹. */
+  --emblem-width: calc(var(--unit) * 52);
+  --emblem-lift: calc(var(--unit) * 34);
+  --sky-height: calc(var(--unit) * 62.5);
+  /* Before it rises, the logo waits just out of sight below the hill. */
   --emblem-drop: calc((1 - var(--rise)) * (var(--emblem-lift) + var(--emblem-width) * 0.56));
   container-type: inline-size;
 }
@@ -248,8 +251,10 @@ body {
 @media (min-width: 640px) {
   .sunrise {
     --sun-radius: calc(var(--unit) * 26);
-    --emblem-width: calc(var(--unit) * 32);
-    --emblem-lift: calc(var(--unit) * 17.5);
+    --word-size: calc(var(--unit) * 18);
+    --emblem-width: calc(var(--unit) * 31);
+    --emblem-lift: calc(var(--unit) * 25);
+    --sky-height: calc(var(--unit) * 42.5);
   }
 }
 
@@ -265,36 +270,43 @@ body {
 
 .sunrise-sky {
   position: relative;
-  height: calc(var(--sun-radius) + var(--unit) * 6);
+  height: var(--sky-height);
   /* A finger sliding sideways moves the emblem, and up or down still scrolls the page. */
   touch-action: pan-y;
 }
 
+/* The name in solid gold, like the wordmark under the logo, standing in front of the logo. */
 .sunrise-word {
   position: absolute;
   inset-inline: 0;
-  bottom: calc(var(--unit) * 1);
-  font-size: calc(var(--unit) * 23);
+  /* Stands the letters on the hill: 0.2 is the font's space below its baseline. */
+  bottom: calc(var(--hill-height) - var(--word-size) * 0.2);
+  font-size: var(--word-size);
   line-height: 1;
   text-align: center;
+  color: transparent;
+  background: linear-gradient(to bottom, #fbebb2 22%, #ecc96f 42%, #cd9c3e 64%, #a2722a 86%);
+  background-clip: text;
 }
 
-/* The emblem in sunrise colours, cut out of this layer. The name inside the layer is dark,
-   so the letters stay readable where they cross the emblem. The layer reaches a little above
-   the sky, so the top of the emblem is never cut off. The 0.519 is half the emblem's height
+/* A soft shadow under the name, so it stands clear of the logo behind it. */
+.sunrise-word-shadow {
+  background: none;
+  color: rgba(4, 12, 8, 0.55);
+  filter: blur(calc(var(--unit) * 0.5));
+  translate: 0 calc(var(--unit) * 0.45);
+}
+
+/* The Avvira logo in its own colours, behind the name. The 0.519 is half the logo's height
    over its width. */
-.sunrise-disc {
+.sunrise-logo {
   position: absolute;
-  inset: calc(var(--unit) * -8) 0 0;
-  background: linear-gradient(
-    to bottom,
-    color-mix(in oklab, #ee9a45, #f8e6ae calc(var(--rise) * 100%)) 30%,
-    color-mix(in oklab, #d9622b, #e2ad45 calc(var(--rise) * 100%)) 100%
-  );
-  mask-image: url("/images/avvira-emblem-mono.svg");
-  mask-repeat: no-repeat;
-  mask-size: var(--emblem-width) auto;
-  mask-position: calc(50% + var(--sun-shift) * 1cqw)
+  inset: 0;
+  pointer-events: none;
+  background-image: url("/images/avvira-emblem-color.svg");
+  background-repeat: no-repeat;
+  background-size: var(--emblem-width) auto;
+  background-position: calc(50% + var(--sun-shift) * 1cqw)
     calc(100% + var(--emblem-width) * 0.519 - var(--emblem-lift) + var(--emblem-drop));
 }
 

@@ -22,7 +22,6 @@ import {
   drawTruck,
   type Fonts,
 } from "./voyageArt";
-import { EMBLEM_BOX, EMBLEM_PATH } from "./emblemPath";
 import { TRAVEL, between, lerp, smooth, timelineAt } from "./voyageTimeline";
 
 type Color = [number, number, number];
@@ -95,11 +94,21 @@ type Frame = {
   fonts: Fonts;
   // How far down the screen the opening words reach, so the harbour can sit below them.
   wordsEnd: number;
+  // The Avvira logo for the sun once its picture has loaded, and how far it has faded in (0 to 1).
+  emblem: HTMLImageElement | null;
+  emblemShown: number;
 };
 
 // The gantry's height, from the water to the top of the girder.
 const SCENE_TOP = 760;
 const LIGHTHOUSE_X = 5600;
+
+// How the camera first frames the harbour: the waterline, and a scale that fits the whole
+// gantry below the opening words.
+function openingView(width: number, height: number, wordsEnd: number) {
+  const water = height * 0.88;
+  return { water, scale: Math.min(width / 2250, (water - wordsEnd - 18) / SCENE_TOP) };
+}
 
 function cameraAt(
   progress: number,
@@ -112,8 +121,7 @@ function cameraAt(
   const portrait = width < height * 0.9;
   const fit = (spanX: number, spanY: number) => Math.min(width / spanX, height / spanY);
 
-  const openingWater = height * 0.88;
-  const wide = Math.min(width / 2250, (openingWater - wordsEnd - 18) / SCENE_TOP);
+  const wide = openingView(width, height, wordsEnd).scale;
   const close = fit(portrait ? 760 : 1960, portrait ? 1180 : 1040);
   const sailing = fit(portrait ? 1560 : 2100, 1000);
 
@@ -143,12 +151,33 @@ function drawSky(ctx: CanvasRenderingContext2D, frame: Frame, sky: ReturnType<ty
   ctx.fillRect(0, 0, width, height);
 }
 
-function sunAt(progress: number, width: number, horizon: number, size: number) {
+// Where the logo first shines, before the story starts: in the middle, below the words, as big as
+// the space allows. A tall screen has open sky between the words and the gantry for it. On a
+// wide one the gantry fills that space, so the logo rises behind the harbour down to the water,
+// as the sun did. The answer is [across the screen, height above the horizon, size], as in the
+// sun's path.
+function openingSpot(frame: Frame, radius: number): [number, number, number] {
+  const { width, height, wordsEnd } = frame;
+  const view = openingView(width, height, wordsEnd);
+  const horizon = view.water - 58 * view.scale;
+  const tall = width < height * 0.9;
+  const top = wordsEnd + height * (tall ? 0.03 : 0.01);
+  const bottom = tall ? view.water - SCENE_TOP * view.scale - height * 0.025 : view.water;
+  // The logo is a little taller than it is wide.
+  const across = Math.min(width * 0.72, (bottom - top) / 1.04, radius * 2);
+  if (across < Math.min(width, height) * 0.22) return [0.5, radius * 0.72, 1];
+  return [0.5, horizon - (top + bottom) / 2, across / (radius * 2)];
+}
+
+function sunAt(frame: Frame, horizon: number, size: number) {
+  const { progress, width } = frame;
   const radius = size * 0.2;
   const path: [number, number, number, number][] = [
     // progress, across the screen, height above the horizon, size
-    [0, 0.5, radius * 0.72, 1],
-    [0.3, 0.62, horizon * 0.62, 0.72],
+    [0, ...openingSpot(frame, radius)],
+    // Once the camera is close on the harbour, it shines between the gantry's girder and the ship.
+    [0.08, 0.7, horizon * 0.47, 0.66],
+    [0.3, 0.64, horizon * 0.47, 0.72],
     [0.6, 0.68, horizon * 0.44, 0.8],
     [0.71, 0.74, radius * 0.72, 1],
     [0.78, 0.76, -radius * 1.2, 1],
@@ -168,63 +197,57 @@ function sunAt(progress: number, width: number, horizon: number, size: number) {
   };
 }
 
-// The Avvira emblem shines in place of the sun, as wide as the sun was.
+// The Avvira logo shines in place of the sun, as wide as the sun was.
 const EMBLEM_SPAN = 2;
-// Room around the emblem's outline for the line drawn along its edge, in the outline's units.
-const EMBLEM_MARGIN = 1;
 
-type EmblemPictures = { width: number; morning: HTMLCanvasElement; sunset: HTMLCanvasElement };
+type EmblemPictures = { logo: HTMLImageElement; width: number; morning: HTMLCanvasElement; sunset: HTMLCanvasElement };
 let emblemPictures: EmblemPictures | null = null;
 
-// The emblem's outline is slow to paint, so it is painted once into two pictures, one in
-// morning colours and one in sunset colours, and only again when the screen size changes.
-function emblemPicturesAt(width: number) {
-  if (emblemPictures?.width === width) return emblemPictures;
+// The logo is copied once into two pictures, at the size the sun is at its biggest: one as it
+// is, and one warmed for sunset. They are only made again when the screen size changes.
+function emblemPicturesAt(logo: HTMLImageElement, width: number) {
+  if (emblemPictures?.logo === logo && emblemPictures.width === width) return emblemPictures;
 
-  const outline = new Path2D(EMBLEM_PATH);
-  const scale = width / EMBLEM_BOX.width;
-  const fade = (art: CanvasRenderingContext2D, top: Color, bottom: Color) => {
-    const gradient = art.createLinearGradient(0, EMBLEM_BOX.y, 0, EMBLEM_BOX.y + EMBLEM_BOX.height);
-    gradient.addColorStop(0, css(top));
-    gradient.addColorStop(1, css(bottom));
-    return gradient;
-  };
-  const paint = (top: Color, bottom: Color, lineTop: Color, lineBottom: Color) => {
+  const height = Math.round((width * logo.naturalHeight) / logo.naturalWidth);
+  const paint = (warm: boolean) => {
     const picture = document.createElement("canvas");
-    picture.width = Math.ceil((EMBLEM_BOX.width + EMBLEM_MARGIN * 2) * scale);
-    picture.height = Math.ceil((EMBLEM_BOX.height + EMBLEM_MARGIN * 2) * scale);
+    picture.width = width;
+    picture.height = height;
     const art = picture.getContext("2d");
     if (!art) return picture;
-    art.scale(scale, scale);
-    art.translate(EMBLEM_MARGIN - EMBLEM_BOX.x, EMBLEM_MARGIN - EMBLEM_BOX.y);
-    // A deeper gold picks out the lines inside the emblem, and its edge. It stays soft at the
-    // top, where the heading sits over the emblem.
-    art.strokeStyle = fade(art, lineTop, lineBottom);
-    art.lineWidth = 1.1;
-    art.lineJoin = "round";
-    art.stroke(outline);
-    art.fillStyle = fade(art, top, bottom);
-    art.fill(outline, "evenodd");
+    art.imageSmoothingQuality = "high";
+    art.drawImage(logo, 0, 0, width, height);
+    if (warm) {
+      // The low sun's orange light, laid over the logo only.
+      art.globalCompositeOperation = "source-atop";
+      art.fillStyle = "rgba(236, 118, 50, 0.45)";
+      art.fillRect(0, 0, width, height);
+    }
     return picture;
   };
 
-  emblemPictures = {
-    width,
-    morning: paint([248, 228, 170], [228, 170, 66], [230, 196, 124], [196, 136, 46]),
-    sunset: paint([244, 164, 84], [214, 92, 46], [226, 138, 70], [178, 70, 34]),
-  };
+  emblemPictures = { logo, width, morning: paint(false), sunset: paint(true) };
   return emblemPictures;
 }
 
-function drawSun(ctx: CanvasRenderingContext2D, frame: Frame, horizon: number) {
-  const { width, height, progress, time, pixelRatio } = frame;
+// Where the sun is now, how strongly it shines, and how warm its light is.
+function sunNow(frame: Frame, horizon: number) {
+  const { width, height, progress } = frame;
   const size = Math.min(Math.max(width, height * 0.9), height * 1.5);
-  const sun = sunAt(progress, width, horizon, size);
   const night = between(progress, 0.76, 0.81) * (1 - between(progress, 0.9, 0.94));
-  const strength = 1 - night;
-  if (strength <= 0) return;
+  return {
+    size,
+    sun: sunAt(frame, horizon, size),
+    strength: 1 - night,
+    warmth: between(progress, 0.64, 0.76) * (1 - between(progress, 0.9, 1)),
+  };
+}
 
-  const warmth = between(progress, 0.64, 0.76) * (1 - between(progress, 0.9, 1));
+// The glow and the fine rays around the logo. They sit behind the clouds.
+function drawSunlight(ctx: CanvasRenderingContext2D, frame: Frame, horizon: number) {
+  const { width, progress, time } = frame;
+  const { size, sun, strength } = sunNow(frame, horizon);
+  if (strength <= 0) return;
 
   ctx.save();
   ctx.beginPath();
@@ -252,16 +275,31 @@ function drawSun(ctx: CanvasRenderingContext2D, frame: Frame, horizon: number) {
     ctx.lineTo(sun.x + Math.cos(angle) * reach, sun.y + Math.sin(angle) * reach);
   }
   ctx.stroke();
+  ctx.restore();
+}
 
-  // The emblem, painted at the biggest the sun gets and drawn smaller when the sun is smaller.
-  // Towards sunset the sunset picture fades in over the morning one.
-  const pictures = emblemPicturesAt(Math.round(size * 0.2 * EMBLEM_SPAN * pixelRatio));
-  const unit = (sun.radius * EMBLEM_SPAN) / EMBLEM_BOX.width;
-  const across = (EMBLEM_BOX.width + EMBLEM_MARGIN * 2) * unit;
-  const down = (EMBLEM_BOX.height + EMBLEM_MARGIN * 2) * unit;
+// The Avvira logo in place of the sun's disc, in front of the clouds so nothing hazes it. It is
+// drawn smaller when the sun is smaller, and towards sunset the warm picture fades in over it.
+function drawSunLogo(ctx: CanvasRenderingContext2D, frame: Frame, horizon: number) {
+  const { width, pixelRatio, emblem, emblemShown } = frame;
+  if (!emblem || emblemShown <= 0) return;
+  const { size, sun, strength, warmth } = sunNow(frame, horizon);
+  if (strength <= 0) return;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, 0, width, horizon);
+  ctx.clip();
+  // A picture too small to see, or a logo whose size is not known yet, is skipped.
+  const pictureWidth = Math.round(size * 0.2 * EMBLEM_SPAN * pixelRatio);
+  if (pictureWidth < 1 || !emblem.naturalWidth || !emblem.naturalHeight) return;
+  const pictures = emblemPicturesAt(emblem, pictureWidth);
+  const across = sun.radius * EMBLEM_SPAN;
+  const down = (across * emblem.naturalHeight) / emblem.naturalWidth;
+  ctx.globalAlpha = emblemShown;
   ctx.drawImage(pictures.morning, sun.x - across / 2, sun.y - down / 2, across, down);
   if (warmth > 0) {
-    ctx.globalAlpha = warmth;
+    ctx.globalAlpha = emblemShown * warmth;
     ctx.drawImage(pictures.sunset, sun.x - across / 2, sun.y - down / 2, across, down);
   }
   ctx.restore();
@@ -637,7 +675,7 @@ function drawWaterDetail(ctx: CanvasRenderingContext2D, frame: Frame, camera: Ca
   ctx.stroke();
 
   const size = Math.min(Math.max(width, height * 0.9), height * 1.5);
-  const sun = sunAt(progress, width, horizon, size);
+  const sun = sunAt(frame, horizon, size);
   const night = between(progress, 0.8, 0.82) * (1 - between(progress, 0.9, 0.92));
   const pathX = lerp(sun.x, width * 0.74, night);
   const color = night > 0.5 ? "rgba(244, 232, 198," : "rgba(246, 200, 110,";
@@ -660,6 +698,8 @@ function drawWaterDetail(ctx: CanvasRenderingContext2D, frame: Frame, camera: Ca
 
 export function drawVoyage(ctx: CanvasRenderingContext2D, frame: Frame) {
   const { width, height, pixelRatio, progress, time, fonts, wordsEnd } = frame;
+  // A stage squeezed to nothing, as while a window is dragged very short, has nothing to draw.
+  if (width < 1 || height < 1) return;
   const state = timelineAt(progress);
   const camera = cameraAt(progress, width, height, state.trolleyX, state.shipX, wordsEnd);
   const sky = skyAt(progress);
@@ -680,8 +720,9 @@ export function drawVoyage(ctx: CanvasRenderingContext2D, frame: Frame) {
   toScreen();
   drawSky(ctx, frame, sky, horizon);
   drawStars(ctx, frame, horizon);
-  drawSun(ctx, frame, horizon);
+  drawSunlight(ctx, frame, horizon);
   drawClouds(ctx, frame, camera, horizon, mix(mix(sky.middle, [255, 248, 232], 0.5), sky.top, 0.2));
+  drawSunLogo(ctx, frame, horizon);
   drawBirds(ctx, frame, camera, horizon);
 
   // The open water, right back to the horizon.

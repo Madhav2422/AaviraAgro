@@ -5,12 +5,13 @@ import type { CSSProperties } from "react";
 type LogoProps = {
   // Uses lighter text for dark backgrounds, like the footer.
   onDark?: boolean;
-  // Turns the coin in the middle of the emblem over every few seconds.
+  // Keeps the coin in the middle of the emblem turning round, like a wheel.
   turningCoin?: boolean;
 };
 
 // The emblem is two pictures: the ring of wheat, leaf and arrow, and the coin on its own
-// under it, so the coin can turn. COIN is where the coin sits, in pixels of the emblem.
+// under it, so the coin can turn. COIN is where the coin sits, in pixels of the emblem. The
+// turning coin is drawn perfectly round, so it does not wobble as it goes.
 const EMBLEM = { width: 213, height: 221 };
 const COIN = { left: 57, top: 46, width: 130, height: 134 };
 const coinBox: CSSProperties = {
@@ -21,9 +22,6 @@ const coinBox: CSSProperties = {
 };
 const coinSrc = "/images/avvira-emblem-coin.png";
 
-// Thin gold discs between the coin's two faces, which show as its edge while it turns.
-const EDGE_LAYERS = 7;
-
 export default function Logo({ onDark = false, turningCoin = false }: LogoProps) {
   return (
     <Link href="/" className="flex w-fit items-center gap-3">
@@ -31,26 +29,14 @@ export default function Logo({ onDark = false, turningCoin = false }: LogoProps)
       <span className="relative block aspect-[213/221] h-14 shrink-0 xl:h-16">
         <span style={coinBox} className="absolute">
           {turningCoin ? (
-            <span className="logo-coin">
-              <span className="logo-coin-turn">
-                {Array.from({ length: EDGE_LAYERS }, (_, layer) => (
-                  <span
-                    key={layer}
-                    style={{ "--layer": layer / (EDGE_LAYERS - 1) } as CSSProperties}
-                    className="logo-coin-edge"
-                  />
-                ))}
-                <Image src={coinSrc} alt="" width={COIN.width} height={COIN.height} loading="eager" className="logo-coin-face" />
-                <Image
-                  src={coinSrc}
-                  alt=""
-                  width={COIN.width}
-                  height={COIN.height}
-                  loading="eager"
-                  className="logo-coin-face logo-coin-back"
-                />
-              </span>
-            </span>
+            <Image
+              src="/images/avvira-emblem-coin-spin.svg"
+              alt=""
+              width={COIN.width}
+              height={COIN.height}
+              loading="eager"
+              className="logo-coin-spin size-full"
+            />
           ) : (
             <Image src={coinSrc} alt="" width={COIN.width} height={COIN.height} loading="eager" className="size-full" />
           )}

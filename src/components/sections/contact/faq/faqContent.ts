@@ -17,7 +17,7 @@ export const faqs: Faq[] = [
   {
     question: "What do you supply?",
     answer:
-      "Wheat, rice, pulses and spices, cleaned, graded and packed to your requirement. Tell us the product and grade you are after and we will confirm availability.",
+      "Wheat, rice, kabuli chana and tuver dal, cleaned, graded and packed to your requirement. Tell us the product and grade you are after and we will confirm availability.",
   },
   {
     question: "Is there a minimum order quantity?",

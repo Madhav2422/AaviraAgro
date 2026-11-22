@@ -10,10 +10,12 @@ import { grainPiles } from "./heroContent";
 // When the first heap starts, the gap before each next one, and how long each pours.
 const START_MS = 300;
 const STAGGER_MS = 240;
-const POUR_MS = 2200;
+// Change POUR_MS to make the pour last longer or shorter, and GRAINS_PER_SECOND to make the
+// stream thicker or thinner.
+const POUR_MS = 5000;
 // The first grains take this long to fall from the top, so the heap starts growing then.
 const FALL_MS = 420;
-const GRAINS_PER_SECOND = 70;
+const GRAINS_PER_SECOND = 150;
 // How big a heap is before any grain has landed on it.
 const SMALLEST = 0.04;
 

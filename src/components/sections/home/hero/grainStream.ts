@@ -8,7 +8,8 @@ const GRAVITY = 2600;
 const SLOPE = 0.75;
 // How long a grain takes to settle into the heap after it lands.
 const SETTLE_SECONDS = 0.35;
-const MAX_GRAINS = 600;
+// Enough for all four streams pouring at once, with room to spare.
+const MAX_GRAINS = 1500;
 
 // A heap to pour onto, in CSS pixels from the top left of the canvas.
 export type PourTarget = {

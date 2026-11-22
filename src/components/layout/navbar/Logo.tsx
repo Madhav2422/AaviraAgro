@@ -5,7 +5,7 @@ import type { CSSProperties } from "react";
 type LogoProps = {
   // Uses lighter text for dark backgrounds, like the footer.
   onDark?: boolean;
-  // Keeps the coin in the middle of the emblem turning round, like a wheel.
+  // Keeps the coin in the middle of the emblem spinning on its upright middle line.
   turningCoin?: boolean;
 };
 

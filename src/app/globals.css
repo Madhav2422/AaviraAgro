@@ -176,7 +176,8 @@ body {
   }
 }
 
-/* Navbar logo: the coin keeps turning round its middle like a wheel, one full turn every 5s.
+/* Navbar logo: the coin keeps spinning on its upright middle line, like a coin spun on a
+   table, one full turn every 5s.
    Change the 5s to make it faster or slower. */
 .logo-coin-spin {
   transform-origin: 50.46% 50.37%;
@@ -184,8 +185,11 @@ body {
 }
 
 @keyframes coin-spin {
+  from {
+    transform: perspective(400px) rotateY(0turn);
+  }
   to {
-    transform: rotate(1turn);
+    transform: perspective(400px) rotateY(1turn);
   }
 }
 

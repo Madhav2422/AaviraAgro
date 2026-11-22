@@ -3,7 +3,7 @@ export const ctaContent = {
     start: "Let's talk",
     accent: "grain.",
   },
-  text: "Wheat, rice, pulses or spices, for one order or a whole season. Tell us what you need and we will take it from there.",
+  text: "Wheat, rice, kabuli chana or tuver dal, for one order or a whole season. Tell us what you need and we will take it from there.",
   button: { label: "Get a Quote", href: "/contact" },
   // The grain that fills the accent word. Any file from public/images/grains works.
   grain: "/images/grains/wheat.webp",

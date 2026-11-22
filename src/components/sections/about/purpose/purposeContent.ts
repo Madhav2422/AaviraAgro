@@ -21,7 +21,7 @@ export type PurposePillar = {
 export const purposePillars: PurposePillar[] = [
   {
     title: "Our Mission",
-    text: "To supply clean, carefully graded grain, pulses and spices that businesses can rely on, while building lasting, fair partnerships with the farmers who grow them.",
+    text: "To supply clean, carefully graded wheat, rice, kabuli chana and tuver dal that businesses can rely on, while building lasting, fair partnerships with the farmers who grow them.",
   },
   {
     title: "Our Vision",

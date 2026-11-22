@@ -1,7 +1,7 @@
 import Link from "next/link";
 import ArrowIcon from "@/components/ui/ArrowIcon";
 import RisingWord from "@/components/ui/RisingWord";
-import GrainPour from "./GrainPour";
+import HeapPour from "./HeapPour";
 import { heroContent } from "./heroContent";
 
 const { headline, text, primaryButton, secondaryButton } = heroContent;
@@ -11,7 +11,7 @@ export default function Hero() {
 
   return (
     <section className="relative isolate flex min-h-[calc(100svh-5rem-1px)] flex-col overflow-hidden xl:min-h-[calc(100svh-5.5rem-1px)]">
-      <GrainPour />
+      <HeapPour />
 
       <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pt-8 sm:px-8 xl:px-6 xl:pt-9">
         <h1 className="pointer-events-none relative z-10 font-display text-[clamp(3.5rem,19vw,7rem)] leading-[1.02] tracking-[-0.03em] text-brand-ink xl:text-[min(11.8vw,24svh,10.75rem)]">

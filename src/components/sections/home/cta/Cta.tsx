@@ -23,7 +23,7 @@ export default function Cta() {
             <span
               aria-hidden="true"
               style={{ backgroundImage: `url(${grain})`, animationDelay: "160ms" }}
-              className="reveal-fill absolute inset-0 bg-brand-wheat bg-size-[14rem] bg-clip-text bg-position-[0%_0%] px-[0.15em] pb-[0.22em] text-transparent transition-[background-position] duration-[1800ms] ease-out group-hover:bg-position-[60%_45%] sm:bg-size-[20rem]"
+              className="reveal-fill absolute inset-0 bg-brand-wheat bg-size-[24rem] bg-clip-text bg-position-[0%_0%] px-[0.15em] pb-[0.22em] text-transparent transition-[background-position] duration-[1800ms] ease-out group-hover:bg-position-[60%_45%] sm:bg-size-[38rem]"
             >
               {heading.accent}
             </span>

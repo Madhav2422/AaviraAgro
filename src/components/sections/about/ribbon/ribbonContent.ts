@@ -2,8 +2,8 @@
 export const ribbonWords: string[] = [
   "Wheat",
   "Rice",
-  "Pulses",
-  "Spices",
+  "Kabuli Chana",
+  "Tuver Dal",
   "Sourced with care",
   "Packed with pride",
 ];
